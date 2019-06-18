@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>iview example</title>
+    <link rel="stylesheet" type="text/css" href="http://unpkg.com/iview/dist/styles/iview.css">
+    <script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
+    <script type="text/javascript" src="http://unpkg.com/iview/dist/iview.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <div style="margin:20px 0 20px 60px">
+      选中区域的坐标
+      {{boxPosition}}
+    </div>
+    {{boxWidth}}---{{boxHeigth}}
+    <br>
+    boxArr:{{boxArr}}
+    <br>
+    {{lineData}}
+    <span v-for="item in lineList" @click="changeLine(item.value)">{{item.label}}-----</span>
+    --------------------------------------------------------------------------------
+    <span v-for="item in rowList" @click="changeRow(item.value)">{{item.label}}</span>
+    <div style="margin: 100px;">
+      <div style="position: relative;">
+        <div>
+          <ul v-for="(i,m) in lineData" >
+            <li  
+              v-for="(j,n) in i.rowData" 
+              @click="handleSelect(m,n)" 
+              style="position: relative;" 
+              @mouseenter="mouseMove(m,n)"
+              :style="{ 'background-color': j.isSelect?'#e8f7fd':'',width:boxWidth+'px',height:boxHeigth+'px',
+              'line-height': boxHeigth+'px'  }">{{n}},{{m}},{{j.isUse}}
+            </li>
+          </ul>
+        </div>
+        <div style="display: none">
+          {{refash}}
+        </div>
+        <div
+          v-for="(item,index) in boxArr"
+          @click="selectBox(index)"
+          style="position: absolute;background-color: #e8f7fd;"
+          :style="{ 
+            'left': (item.left)*boxWidth+item.left+'px',
+            'top':(item.top)*boxHeigth+item.top+'px',
+            width:(item.width+1)*boxWidth+item.width+'px',
+            height:(item.height+1)*boxHeigth+item.height+'px',
+          'z-index':selecIndex === index?1:0,
+          'border':selecIndex === index ? '1px solid #1890ff':'1px solid #bbb' }">
+          <span 
+            @click="removeBox(index)" 
+            style="position: absolute;top: -20px;right: 0;">x
+          </span>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            boxWidth:0,
+            boxHeigth:0,
+            selecIndex:0,
+            refash:false,
+            isClick:false,
+            falseClick:{
+              x:0,
+              y:0
+            },
+            trueClick:{
+              x:0,
+              y:0
+            },
+            boxArr:[],
+            boxPosition:[],
+            lineData:[
+              { rowData:[
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false}] 
+              },
+              { rowData:[
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false}] 
+              },
+              { rowData:[
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false}] 
+              },
+              { rowData:[
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false},
+                {isSelect:false,isUse:false}] 
+              },
+            ],
+
+            lineList:[
+              {label:'4',value:4},
+              {label:'5',value:5},
+              {label:'6',value:6},
+              {label:'7',value:7},
+              {label:'8',value:8},
+            ],
+
+            line:4,
+
+            rowList:[
+              {label:'4',value:4},
+              {label:'5',value:5},
+              {label:'6',value:6},
+              {label:'7',value:7},
+              {label:'8',value:8},
+            ],
+            row:4,
+            isUse:false,
+        },
+        created() {
+          this.boxWidth = 325/4;
+          this.boxHeigth = 325/4;
+          this.boxArr=[]
+          // this.boxPosition=[{ "startX": 0, "startY": 0, "endX": 1, "endY": 1 }, { "startX": 2, "startY": 0, "endX": 3, "endY": 3 }, { "startX": 0, "startY": 2, "endX": 1, "endY": 3 }]
+        },
+        methods: {
+           
+
+            changeLine( val ) {
+              this.refash=!this.refash
+              this.line = val;
+              
+              // this.boxWidth = 325/val;
+              
+              // if( val === 8 ) {
+              //   this.boxHeigth = 321/val;
+              // }else{
+              //   this.boxHeigth = 325/val;
+              // }
+
+              let sum = 325 - (val-4);
+
+
+
+              this.boxHeigth = sum/val;
+
+              this.boxPosition = [];
+              this.boxArr = [];
+              this.changeBox();
+
+
+              console.log( val )
+            },
+            changeRow( val ) {
+              this.refash=!this.refash
+              this.row = val;
+              let sum = 325 - (val-4);
+              this.boxWidth = sum/val;
+              // if( val === 8 ) {
+              //   this.boxWidth = 321/val;
+
+              // }else {
+              //   this.boxWidth = 325/val;
+              // }
+              
+              
+              // this.boxHeigth = 325/val;
+              // for( let i in this.lineData ) {
+              //   for( let j in this.lineData[i].rowData ) {
+              //     this.lineData[i].rowData[j].isSelect = false;
+              //     this.lineData[i].rowData[j].isUse = false;
+              //   }
+              // }
+              this.boxPosition = [];
+              this.boxArr = [];
+              this.changeBox();
+              console.log( val )
+            },
+            handleSelect(m,n) {
+              this.isClick = !this.isClick;
+              if( this.isClick ) {//点击选择起点
+                
+                this.trueClick.x = n;
+                this.trueClick.y = m;
+                this.lineData[m].rowData[n].isSelect = true;
+                this.isUse = false;
+              }
+              if( !this.isClick ) {//点击选择区域
+
+                this.falseClick.x = n;
+                this.falseClick.y = m;
+                this.resetColor();
+                let startX = this.trueClick.x < n?this.trueClick.x : n;
+                let startY = this.trueClick.y < m?this.trueClick.y : m
+                let endX = this.trueClick.x > n?this.trueClick.x : n;
+                let endY = this.trueClick.y > m?this.trueClick.y : m;
+                if( this.isUse ) {
+                  this.boxPosition.push({
+                    startX:this.trueClick.x,
+                    startY:this.trueClick.y,
+                    endX:this.trueClick.x+1,
+                    endY:this.trueClick.y+1,
+                  });
+                  this.boxArr.push({
+                    left:this.trueClick.x,
+                    top:this.trueClick.y,
+                    endLeft:this.trueClick.x+1,
+                    endTop:this.trueClick.y+1,
+                    height:0,
+                    width:0
+                  });
+                  this.lineData[this.trueClick.y].rowData[this.trueClick.x].isUse = true;
+                }else {
+                  this.boxArr.push({
+                    left:this.falseClick.x-this.trueClick.x>0?this.trueClick.x:this.falseClick.x,
+                    top:this.falseClick.y-this.trueClick.y>0?this.trueClick.y:this.falseClick.y,
+                    endLeft:this.trueClick.x>n?this.trueClick.x+1:n+1,
+                    endTop:this.trueClick.y>m?this.trueClick.y+1:m+1,
+                    height:Math.abs(this.falseClick.y-this.trueClick.y),
+                    width:Math.abs(this.falseClick.x-this.trueClick.x)
+                  });
+                  this.boxPosition.push({
+                    startX:this.trueClick.x<n?this.trueClick.x:n,
+                    startY:this.trueClick.y<m?this.trueClick.y:m,
+                    endX:this.trueClick.x>n?this.trueClick.x+1:n+1,
+                    endY:this.trueClick.y>m?this.trueClick.y+1:m+1,
+                  })
+                  for( let y = startY; y <= endY; y ++ ) {
+                    for(let x = startX; x <= endX; x ++ ) {
+                      this.lineData[y].rowData[x].isUse = true;
+                    }
+                  }
+                }
+                this.selecIndex = this.boxArr.length -1;
+              }
+              this.refash = !this.refash;
+            },
+
+            mouseMove(m,n) {
+              let startX = this.trueClick.x < n?this.trueClick.x : n;
+              let startY = this.trueClick.y < m?this.trueClick.y : m
+              let endX = this.trueClick.x > n?this.trueClick.x : n;
+              let endY = this.trueClick.y > m?this.trueClick.y : m;
+              if( this.isClick ) {
+                let allBol = [];
+                for( let y = startY; y <= endY; y ++ ) {
+                  for(let x = startX; x <= endX; x ++ ) {
+                    allBol.push(this.lineData[y].rowData[x].isUse)
+                    // if( this.lineData[y].rowData[x].isUse ) {
+                    //   this.isUse = true;
+                    //   startX = this.trueClick.x;
+                    //   startY = this.trueClick.y;
+                    //   endX = this.trueClick.x;
+                    //   endY = this.trueClick.y;
+                    // }else {
+                    // }
+                  }
+                }
+                this.isUse = allBol.some( item => {
+                  return item === true;
+                } );
+                if( !this.isUse ) {
+                  for( let i in this.lineData ) { 
+                    if( startY <= i && i <= endY ) {
+                      for( let j in this.lineData[i].rowData ) {
+                        if( startX <= j && j <= endX ) { 
+                          this.lineData[i].rowData[j].isSelect = true;
+                        }else {
+                          this.lineData[i].rowData[j].isSelect = false;
+                        }
+                      }
+                    }else {
+                      for( let j in this.lineData[i].rowData ) {
+                        this.lineData[i].rowData[j].isSelect = false;
+                      }
+                    }
+                  }
+
+                }
+                
+              }
+              this.refash = !this.refash;
+            },
+
+            resetColor() {
+              for( let i in this.lineData ) {
+                for( let j in this.lineData[i].rowData ) {
+                  this.lineData[i].rowData[j].isSelect = false;
+                }
+              }
+            },
+
+            removeBox( index ) {
+              this.boxArr.splice( index, 1);
+              let removeIndex = this.boxPosition.splice( index, 1 );
+              this.falseClick.x = removeIndex[0].startX;
+              this.falseClick.y = removeIndex[0].startY;
+              this.trueClick.x = removeIndex[0].endX;
+              this.trueClick.y = removeIndex[0].endY;
+              let startX = this.trueClick.x < this.falseClick.x?this.trueClick.x : this.falseClick.x;
+              let startY = this.trueClick.y < this.falseClick.y?this.trueClick.y : this.falseClick.y;
+              let endX = this.trueClick.x > this.falseClick.x?this.trueClick.x : this.falseClick.x;
+              let endY = this.trueClick.y > this.falseClick.y?this.trueClick.y : this.falseClick.y;
+              for( let y = startY; y <= endY; y ++ ) {
+                for(let x = startX; x <= endX; x ++ ) {
+                  this.lineData[y].rowData[x].isUse = false;
+                  // this.$set(this.lineData[y].rowData[x],'isUse',false)
+                  this.refash = !this.refash;
+                }
+              }
+            },
+
+
+            changeBox() {
+              this.lineData = [];
+              for( let i = 0;i < this.line; i++ ) {
+                this.lineData[i] = {};
+                this.lineData[i].rowData = [];
+                for( let j = 0;j < this.row; j++ ) {
+                  this.lineData[i].rowData[j] = {
+                    isSelect:false,
+                    isUse:false
+                  };
+                }
+              }
+            },
+
+            selectBox( index ) {
+              this.selecIndex = index;
+            }
+        }
+    })
+  </script>
+</body>
+</html>
+
+<style type="text/css" media="screen">
+  body,div,li{
+    box-sizing:content-box;
+  }
+  li{
+    /*width: 80px;*/
+    /*height: 80px;*/
+    /*line-height: 80px;*/
+    border:1px solid #bbb;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    border-left: 0;
+    border-bottom: 0;
+  }
+  ul li:first-child{
+    border-left:1px solid #bbb;
+  }
+  li:nth-child(4n+1){
+    /*border-left:1px solid #ccc;*/
+  }
+  ul:last-child li{
+    border-bottom:1px solid #bbb;
+  }
+</style>
